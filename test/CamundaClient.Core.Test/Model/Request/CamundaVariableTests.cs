@@ -13,7 +13,7 @@ public class CamundaVariableTests
         var local = true;
 
         // Act
-        var camundaVariable = CamundaVariable.Create(value, type, valueInfo, local);
+        var camundaVariable = CamundaVariable.CreateTriggerVariable(value, type, valueInfo, local);
 
         // Assert
         Assert.Equal(value, camundaVariable.Value);
@@ -23,16 +23,16 @@ public class CamundaVariableTests
     }
 
     [Fact]
-    public void Create_ShouldThrowException_WhenTypeIsNull()
+    public void Create_ShouldThrowException_WhenValueIsNull()
     {
         // Arrange
-        var value = new { Name = "Test" };
-        string type = null;
+        object? value = null;
+        string? type = "String";
         var valueInfo = new Dictionary<string, object> { { "infoKey", "infoValue" } };
         var local = true;
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => CamundaVariable.Create(value, type, valueInfo, local));
-        Assert.Equal("type", exception.ParamName);
+        var exception = Assert.Throws<ArgumentNullException>(() => CamundaVariable.CreateTriggerVariable(value!, type, valueInfo, local));
+        Assert.Equal("value", exception.ParamName);
     }
 }

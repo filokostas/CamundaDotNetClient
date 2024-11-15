@@ -1,4 +1,5 @@
 ﻿using CamundaClient.Core.Utilities;
+using Newtonsoft.Json;
 
 namespace CamundaClient.Core.Models.Requests;
 
@@ -9,8 +10,8 @@ public record CamundaVariable
     public Dictionary<string, object>? ValueInfo { get; }
     public bool? Local { get; }
 
-    
-    private CamundaVariable(object value, string? type = null, Dictionary<string, object>? valueInfo = null, bool? local = null)
+	[JsonConstructor]
+	private CamundaVariable(object value, string? type = null, Dictionary<string, object>? valueInfo = null, bool? local = null)
     {
         Guard.NotNull(value, nameof(value));
 

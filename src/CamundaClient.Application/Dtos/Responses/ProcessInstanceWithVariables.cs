@@ -1,6 +1,6 @@
-﻿using CamundaClient.Core.Models.Requests;
+﻿using CamundaClient.Application.Dtos.Requests;
 
-namespace CamundaClient.Core.Models.Responses;
+namespace CamundaClient.Application.Dtos.Responses;
 public record ProcessInstanceWithVariables : ProcessInstance
 {
     /// <summary>

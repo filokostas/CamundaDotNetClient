@@ -1,8 +1,8 @@
-﻿using CamundaClient.Core.Exceptions;
-using CamundaClient.Core.Models.Requests;
-using CamundaClient.Core.Models.Responses;
-using CamundaClient.Core.Services.Interfaces;
-using CamundaClient.Core.Utilities;
+﻿using CamundaClient.Application.Dtos.Requests;
+using CamundaClient.Application.Dtos.Responses;
+using CamundaClient.Application.Interfaces;
+using CamundaClient.Infrastructure.Exceptions;
+using CamundaClient.Infrastructure.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text;
@@ -13,11 +13,13 @@ public class CamundaHttpClient : ICamundaHttpClient
 {
     private readonly HttpClient _httpClient;
 	private readonly ILogger<CamundaHttpClient> _logger;
+    private readonly IJsonSerializer _jsonSerializer;
 
-	public CamundaHttpClient(HttpClient httpClient, ILogger<CamundaHttpClient> logger)
-    {
+	public CamundaHttpClient(HttpClient httpClient, ILogger<CamundaHttpClient> logger, IJsonSerializer jsonSerializer)
+	{
         _httpClient = httpClient;
 		_logger = logger;
+		_jsonSerializer = jsonSerializer;
 	}
 
     public async Task<ProcessInstanceWithVariables> StartProcessAsync(string processDefinitionKey, string? businessKey = null, 
@@ -47,15 +49,27 @@ public class CamundaHttpClient : ICamundaHttpClient
             withVariablesInReturn: withVariablesInReturn
         );
 
-        var jsonContent = JsonHelper.Serialize(request);
-        var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+		if (request == null)
+		{
+			throw new InvalidOperationException("Request cannot be null.");
+		}
+
+		var jsonContent = _jsonSerializer.Serialize(request);
+
+		if (string.IsNullOrEmpty(jsonContent))
+		{
+			throw new InvalidOperationException("Serialized content cannot be null or empty.");
+		}
+
+		var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
 		_logger.LogDebug("Sending HTTP POST to /process-definition/key/{@DefinitionKey}/start", processDefinitionKey);
 
 		// Αποστολή του αιτήματος στο Camunda API
 		var response = await _httpClient.PostAsync($"process-definition/key/{processDefinitionKey}/start", httpContent);
 
-        if (!response.IsSuccessStatusCode)
+
+		if (!response.IsSuccessStatusCode)
         {
             var errorContent = await response.Content.ReadAsStringAsync();
 			_logger.LogError("Failed to start process instance. StatusCode: {@StatusCode}, Response: {@Response}",
@@ -68,7 +82,7 @@ public class CamundaHttpClient : ICamundaHttpClient
             {
                 try
                 {
-                    errorDetails = JsonHelper.Deserialize<CamundaError>(errorContent);
+                    errorDetails = _jsonSerializer.Deserialize<CamundaError>(errorContent);
                 }
                 catch
                 {
@@ -84,7 +98,7 @@ public class CamundaHttpClient : ICamundaHttpClient
 
 		_logger.LogInformation("Process instance started successfully. Response: {@Response}", responseData);
 
-		var processInstance = JsonHelper.Deserialize<ProcessInstanceWithVariables>(responseData);
+		var processInstance = _jsonSerializer.Deserialize<ProcessInstanceWithVariables>(responseData);
 
         return processInstance;
     }

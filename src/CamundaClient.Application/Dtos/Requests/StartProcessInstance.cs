@@ -1,4 +1,4 @@
-﻿namespace CamundaClient.Core.Models.Requests;
+﻿namespace CamundaClient.Application.Dtos.Requests;
 public record StartProcessInstance
 {
     public string? BusinessKey { get; }

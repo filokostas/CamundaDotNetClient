@@ -1,6 +1,6 @@
-﻿using CamundaClient.Core.Utilities;
+﻿using CamundaClient.Application.Utilities;
 
-namespace CamundaClient.Core.Models.Requests;
+namespace CamundaClient.Application.Dtos.Requests;
 
 public record ProcessInstanceModificationInstruction
 {

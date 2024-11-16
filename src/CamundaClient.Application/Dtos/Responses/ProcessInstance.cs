@@ -1,4 +1,4 @@
-﻿namespace CamundaClient.Core.Models.Responses;
+﻿namespace CamundaClient.Application.Dtos.Responses;
 public record ProcessInstance : Linkable
 {
     /// <summary>

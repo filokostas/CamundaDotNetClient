@@ -1,4 +1,4 @@
-﻿using CamundaClient.Core.Models.Requests;
+﻿using CamundaClient.Application.Dtos.Requests;
 
 namespace CamundaClient.Core.Test.Model.Request;
 public class CamundaVariableTests

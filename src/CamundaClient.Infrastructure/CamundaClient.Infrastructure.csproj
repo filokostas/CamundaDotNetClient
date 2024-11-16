@@ -11,9 +11,11 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CamundaClient.Application\CamundaClient.Application.csproj" />
     <ProjectReference Include="..\CamundaClient.Core\CamundaClient.Core.csproj" />
   </ItemGroup>
 

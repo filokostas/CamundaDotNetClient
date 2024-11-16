@@ -1,4 +1,4 @@
-﻿using CamundaClient.Core.Services.Interfaces;
+﻿using CamundaClient.Application.Interfaces;
 using CamundaClient.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

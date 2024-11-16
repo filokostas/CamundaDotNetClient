@@ -1,5 +1,7 @@
-using CamundaClient.Core.Services.Interfaces;
+using CamundaClient.Application.Interfaces;
 using CamundaClient.Infrastructure;
+using CamundaClient.Infrastructure.Interfaces;
+using CamundaClient.Infrastructure.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CamundaClient.IntegrationTests;
@@ -43,5 +45,22 @@ public class CamundaHttpClientIntegrationTests
 		Assert.NotNull(result.Variables);
 		Assert.True(result.Variables.ContainsKey("amount"));
 		Assert.Equal(1000L, result.Variables["amount"].Value);
+	}
+
+	[Fact]
+	public void DependencyInjection_ShouldRegisterIJsonSerializer()
+	{
+		// Arrange
+		var services = new ServiceCollection();
+		services.AddCamundaHttpClient(options => options.BaseUrl = "http://example.com");
+
+		var provider = services.BuildServiceProvider();
+
+		// Act
+		var serializer = provider.GetService<IJsonSerializer>();
+
+		// Assert
+		Assert.NotNull(serializer);
+		Assert.IsType<NewtonsoftJsonSerializer>(serializer);
 	}
 }

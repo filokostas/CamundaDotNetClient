@@ -1,8 +1,8 @@
 ﻿using CamundaClient.Application.Dtos.Requests;
 using CamundaClient.Application.Dtos.Responses;
 using CamundaClient.Application.Interfaces;
-using CamundaClient.Core.Services;
 using CamundaClient.Infrastructure.Configuration;
+using CamundaClient.Infrastructure.Http;
 using CamundaClient.Infrastructure.Interfaces;
 using CamundaClient.Infrastructure.Utilities;
 using Microsoft.Extensions.DependencyInjection;
@@ -87,7 +87,7 @@ public class CamundaClientTests
 		};
 
 		// Act
-		var result = await camundaClient.StartProcessAsync("processKey123", "businessKey123", variables);
+		var result = await camundaClient.StartInstanceAsync("processKey123", "businessKey123", variables);
 
 		// Assert
 		Assert.NotNull(result);

@@ -36,7 +36,7 @@ public class CamundaHttpClientIntegrationTests
 		};
 
 		// Act
-		var result = await _client.StartProcessAsync("ReviewInvoice", "businessKey123", variables, true);
+		var result = await _client.StartInstanceAsync("ReviewInvoice", "businessKey123", variables, true);
 
 		// Assert
 		Assert.NotNull(result);

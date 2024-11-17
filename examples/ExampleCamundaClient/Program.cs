@@ -36,8 +36,8 @@ var variables = new Dictionary<string, object>
 
 try
 {
-	// Call StartProcessAsync
-	var result = await camundaHttpClient.StartProcessAsync("ReviewInvoice", "businessKey123", variables, true);//, "businessKey123", variables, withVariablesInReturn: true);
+	// Call StartInstanceAsync
+	var result = await camundaHttpClient.StartInstanceAsync("ReviewInvoice", "businessKey123", variables, true);//, "businessKey123", variables, withVariablesInReturn: true);
 
 	Console.WriteLine($"Process started successfully with ID: {result.Id}");
 	Console.WriteLine($"Definition ID: {result.DefinitionId}");

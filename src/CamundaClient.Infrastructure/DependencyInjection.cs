@@ -1,7 +1,6 @@
 ﻿using CamundaClient.Infrastructure.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
-using CamundaClient.Core.Services;
 using System.Net.Http.Headers;
 using Polly.Extensions.Http;
 using Polly;
@@ -10,6 +9,7 @@ using CamundaClient.Application.Interfaces;
 using CamundaClient.Infrastructure.Interfaces;
 using CamundaClient.Infrastructure.Utilities;
 using Microsoft.Extensions.Logging;
+using CamundaClient.Infrastructure.Http;
 
 namespace CamundaClient.Infrastructure;
 public static class DependencyInjection

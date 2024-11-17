@@ -7,47 +7,47 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text;
 
-namespace CamundaClient.Core.Services;
+namespace CamundaClient.Infrastructure.Http;
 
 public class CamundaHttpClient : ICamundaHttpClient
 {
-    private readonly HttpClient _httpClient;
+	private readonly HttpClient _httpClient;
 	private readonly ILogger<CamundaHttpClient> _logger;
-    private readonly IJsonSerializer _jsonSerializer;
+	private readonly IJsonSerializer _jsonSerializer;
 
 	public CamundaHttpClient(HttpClient httpClient, ILogger<CamundaHttpClient> logger, IJsonSerializer jsonSerializer)
 	{
-        _httpClient = httpClient;
+		_httpClient = httpClient;
 		_logger = logger;
 		_jsonSerializer = jsonSerializer;
 	}
 
-    public async Task<ProcessInstanceWithVariables> StartProcessAsync(string processDefinitionKey, string? businessKey = null, 
-        Dictionary<string, object>? variables = null, bool? withVariablesInReturn = null)
-    {
+	public async Task<ProcessInstanceWithVariables> StartInstanceAsync(string processDefinitionKey, string? businessKey = null,
+		Dictionary<string, object>? variables = null, bool? withVariablesInReturn = null)
+	{
 		_logger.LogInformation("Starting process instance with {@ProcessDefinitionKey} and {@BusinessKey}",
 			processDefinitionKey, businessKey);
 
 		// check if variables is null
 		if (variables == null)
-        {
-            variables = new Dictionary<string, object>();
-        }
+		{
+			variables = [];
+		}
 
 		var camundaVariables = variables.ToDictionary(
-            kv => kv.Key,
-            kv => CamundaVariable.Create(value: kv.Value, type: GetVariableType(kv.Value))
-        );
+			kv => kv.Key,
+			kv => CamundaVariable.Create(value: kv.Value, type: GetVariableType(kv.Value))
+		);
 
-        var request = StartProcessInstance.Create(
-            businessKey: businessKey,
-            variables: camundaVariables,
-            caseInstanceId: null,
-            instructions: null,
-            skipCustomListeners: false,
-            skipIoMappings: false,
-            withVariablesInReturn: withVariablesInReturn
-        );
+		var request = StartProcessInstance.Create(
+			businessKey: businessKey,
+			variables: camundaVariables,
+			caseInstanceId: null,
+			instructions: null,
+			skipCustomListeners: false,
+			skipIoMappings: false,
+			withVariablesInReturn: withVariablesInReturn
+		);
 
 		if (request == null)
 		{
@@ -70,50 +70,50 @@ public class CamundaHttpClient : ICamundaHttpClient
 
 
 		if (!response.IsSuccessStatusCode)
-        {
-            var errorContent = await response.Content.ReadAsStringAsync();
+		{
+			var errorContent = await response.Content.ReadAsStringAsync();
 			_logger.LogError("Failed to start process instance. StatusCode: {@StatusCode}, Response: {@Response}",
 			   response.StatusCode, errorContent);
 
 			CamundaError? errorDetails = null;
 
-            // Check if the status code is 400 or 500 before attempting to deserialize error details
-            if (response.StatusCode == HttpStatusCode.BadRequest || response.StatusCode == HttpStatusCode.InternalServerError)
-            {
-                try
-                {
-                    errorDetails = _jsonSerializer.Deserialize<CamundaError>(errorContent);
-                }
-                catch
-                {
-                }
-            }
+			// Check if the status code is 400 or 500 before attempting to deserialize error details
+			if (response.StatusCode == HttpStatusCode.BadRequest || response.StatusCode == HttpStatusCode.InternalServerError)
+			{
+				try
+				{
+					errorDetails = _jsonSerializer.Deserialize<CamundaError>(errorContent);
+				}
+				catch
+				{
+				}
+			}
 
-            throw new CamundaApiException($"Camunda API returned an error. Status code: {response.StatusCode}",
-                                       (int)response.StatusCode,
-                                       errorDetails);
-        }
+			throw new CamundaApiException($"Camunda API returned an error. Status code: {response.StatusCode}",
+									   (int)response.StatusCode,
+									   errorDetails);
+		}
 
-        var responseData = await response.Content.ReadAsStringAsync();
+		var responseData = await response.Content.ReadAsStringAsync();
 
 		_logger.LogInformation("Process instance started successfully. Response: {@Response}", responseData);
 
 		var processInstance = _jsonSerializer.Deserialize<ProcessInstanceWithVariables>(responseData);
 
-        return processInstance;
-    }
+		return processInstance;
+	}
 
-    private string GetVariableType(object value)
-    {
-        return value switch
-        {
-            int => "Integer",
-            bool => "Boolean",
-            string => "String",
-            double => "Double",
-            long => "Long",
-            _ => "Object"
-        };
-    }
+	private string GetVariableType(object value)
+	{
+		return value switch
+		{
+			int => "Integer",
+			bool => "Boolean",
+			string => "String",
+			double => "Double",
+			long => "Long",
+			_ => "Object"
+		};
+	}
 }
 

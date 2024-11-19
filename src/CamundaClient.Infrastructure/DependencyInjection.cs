@@ -1,5 +1,6 @@
 ﻿using CamundaClient.Application.Interfaces.Http;
 using CamundaClient.Infrastructure.Configuration;
+using CamundaClient.Infrastructure.Handlers;
 using CamundaClient.Infrastructure.Http;
 using CamundaClient.Infrastructure.Interfaces;
 using CamundaClient.Infrastructure.Utilities;
@@ -26,10 +27,10 @@ public static class DependencyInjection
 
         services.AddTransient<IJsonSerializer, NewtonsoftJsonSerializer>();
 
-        services.AddHttpClient<ICamundaHttpClient, CamundaHttpClient>((provider, client) =>
+        services.AddHttpClient<IHttpRequestHandler, HttpRequestHandler>((provider, client) =>
         {
             var options = provider.GetRequiredService<IOptions<CamundaClientOptions>>().Value;
-            var logger = provider.GetRequiredService<ILogger<ICamundaHttpClient>>();
+            //var logger = provider.GetRequiredService<ILogger<ICamundaHttpClient>>();
 
             client.BaseAddress = new Uri(options.BaseUrl);
 
@@ -81,6 +82,9 @@ public static class DependencyInjection
                 return Task.CompletedTask;
             });
         });
+
+        services.AddTransient<IHttpResponseHandler, HttpResponseHandler>();
+        services.AddTransient<ICamundaHttpClient, CamundaHttpClient>();
 
         // Services
 

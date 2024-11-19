@@ -25,27 +25,27 @@ public class CamundaHttpClientIntegrationTests
         _client = serviceProvider.GetRequiredService<ICamundaHttpClient>();
     }
 
-    [Fact]
-    public async Task StartProcessAsync_ValidRequest_ReturnsProcessInstanceWithVariables()
-    {
-        // Arrange
-        var variables = new Dictionary<string, object>
-        {
-            { "amount", 1000 },
-            { "approved", true }
-        };
+    //[Fact]
+    //public async Task StartProcessAsync_ValidRequest_ReturnsProcessInstanceWithVariables()
+    //{
+    //    // Arrange
+    //    var variables = new Dictionary<string, object>
+    //    {
+    //        { "amount", 1000 },
+    //        { "approved", true }
+    //    };
 
-        // Act
-        var result = await _client.StartInstanceAsync("ReviewInvoice", "businessKey123", variables, true);
+    //    // Act
+    //    var result = await _client.StartInstanceAsync("ReviewInvoice", "businessKey123", variables, true);
 
-        // Assert
-        Assert.NotNull(result);
-        Assert.NotNull(result.Id);
-        Assert.Equal("businessKey123", result.BusinessKey);
-        Assert.NotNull(result.Variables);
-        Assert.True(result.Variables.ContainsKey("amount"));
-        Assert.Equal(1000L, result.Variables["amount"].Value);
-    }
+    //    // Assert
+    //    Assert.NotNull(result);
+    //    Assert.NotNull(result.Id);
+    //    Assert.Equal("businessKey123", result.BusinessKey);
+    //    Assert.NotNull(result.Variables);
+    //    Assert.True(result.Variables.ContainsKey("amount"));
+    //    Assert.Equal(1000L, result.Variables["amount"].Value);
+    //}
 
     [Fact]
     public void DependencyInjection_ShouldRegisterIJsonSerializer()

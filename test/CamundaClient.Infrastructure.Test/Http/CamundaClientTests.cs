@@ -1,6 +1,6 @@
 ﻿using CamundaClient.Application.Dtos.Requests;
 using CamundaClient.Application.Dtos.Responses;
-using CamundaClient.Application.Interfaces;
+using CamundaClient.Application.Interfaces.Http;
 using CamundaClient.Infrastructure.Configuration;
 using CamundaClient.Infrastructure.Http;
 using CamundaClient.Infrastructure.Interfaces;

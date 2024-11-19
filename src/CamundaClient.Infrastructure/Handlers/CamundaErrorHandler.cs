@@ -1,4 +1,4 @@
-﻿using CamundaClient.Application.Dtos.Responses;
+﻿using CamundaClient.Application.Dtos.Exceptions;
 using CamundaClient.Infrastructure.Exceptions;
 using CamundaClient.Infrastructure.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -20,11 +20,11 @@ public class CamundaErrorHandler : ICamundaErrorHandler
 		if (response.IsSuccessStatusCode) return;
 
 		var errorContent = await response.Content.ReadAsStringAsync();
-		CamundaError? errorDetails = null;
+		CamundaException? errorDetails = null;
 
 		try
 		{
-			errorDetails = _jsonSerializer.Deserialize<CamundaError>(errorContent);
+			errorDetails = _jsonSerializer.Deserialize<CamundaException>(errorContent);
 		}
 		catch (Exception ex)
 		{

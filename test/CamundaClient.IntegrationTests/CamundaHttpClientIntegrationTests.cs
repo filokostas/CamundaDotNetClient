@@ -1,4 +1,4 @@
-using CamundaClient.Application.Interfaces;
+using CamundaClient.Application.Interfaces.Http;
 using CamundaClient.Infrastructure;
 using CamundaClient.Infrastructure.Interfaces;
 using CamundaClient.Infrastructure.Utilities;

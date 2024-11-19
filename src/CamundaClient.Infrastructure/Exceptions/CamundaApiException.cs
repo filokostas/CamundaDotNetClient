@@ -1,12 +1,12 @@
-﻿using CamundaClient.Application.Dtos.Responses;
+﻿using CamundaClient.Application.Dtos.Exceptions;
 
 namespace CamundaClient.Infrastructure.Exceptions;
 public class CamundaApiException : Exception
 {
 	public int StatusCode { get; }
-	public CamundaError? ErrorDetails { get; }
+	public CamundaException? ErrorDetails { get; }
 
-	public CamundaApiException(string message, int statusCode, CamundaError? errorDetails = null)
+	public CamundaApiException(string message, int statusCode, CamundaException? errorDetails = null)
 		: base(message)
 	{
 		StatusCode = statusCode;

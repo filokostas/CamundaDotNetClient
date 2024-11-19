@@ -5,11 +5,11 @@ using System.Net.Http.Headers;
 using Polly.Extensions.Http;
 using Polly;
 using System.Net;
-using CamundaClient.Application.Interfaces;
 using CamundaClient.Infrastructure.Interfaces;
 using CamundaClient.Infrastructure.Utilities;
 using Microsoft.Extensions.Logging;
 using CamundaClient.Infrastructure.Http;
+using CamundaClient.Application.Interfaces.Http;
 
 namespace CamundaClient.Infrastructure;
 public static class DependencyInjection
@@ -81,17 +81,8 @@ public static class DependencyInjection
 				return Task.CompletedTask;
 			});
 		});
-		//.AddPolicyHandler((provider, request) =>
-		//{
-		//	var logger = provider.GetRequiredService<ILogger<ICamundaHttpClient>>();
-		//	return Policy<HttpResponseMessage>
-		//		.Handle<HttpRequestException>()
-		//		.OrResult(r => !r.IsSuccessStatusCode)
-		//		.RetryAsync(3, onRetry: (outcome, retryCount, context) =>
-		//		{
-		//			logger.LogWarning("Retry {RetryCount} for {RequestUri}. Reason: {Reason}. Context: {@Context}", retryCount, outcome.Result?.RequestMessage?.RequestUri, outcome.Exception?.Message ?? outcome.Result?.StatusCode.ToString(), outcome);
-		//		});
-		//});
+
+		// Services
 
 		return services;
 	}

@@ -1,4 +1,7 @@
-﻿using CamundaClient.Application.Interfaces;
+﻿using CamundaClient.Application.Dtos.Requests;
+using CamundaClient.Application.Interfaces.Http;
+using CamundaClient.Application.Interfaces.Services;
+using CamundaClient.Application.Services;
 using CamundaClient.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -22,22 +25,32 @@ services.AddCamundaHttpClient(options =>
 	// options.AuthenticationToken = "your-auth-token";
 });
 
+services.AddScoped<IProcessDefinitionService, ProcessDefinitionService>();
+
 var serviceProvider = services.BuildServiceProvider();
 
-// Resolve the ICamundaHttpClient
-var camundaHttpClient = serviceProvider.GetRequiredService<ICamundaHttpClient>();
+// Resolve the ProcessDefinitionService
+var processDefinitionService = serviceProvider.GetRequiredService<IProcessDefinitionService>();
+
 
 // Prepare request data
-var variables = new Dictionary<string, object>
-		{
-			{ "amount", 1000 },
-			{ "approved", true }
-		};
+var variables = new Dictionary<string, CamundaVariable>
+{
+	{ "amount", CamundaVariable.Create(1000, "Integer") },
+	{ "approved", CamundaVariable.Create(true, "Boolean") }
+};
+
+// Create the StartProcessInstance request
+var startProcessRequest = StartProcessInstance.Create(
+	businessKey: "businessKey123",
+	variables: variables,
+	withVariablesInReturn: true
+);
 
 try
 {
 	// Call StartInstanceAsync
-	var result = await camundaHttpClient.StartInstanceAsync("ReviewInvoice", "businessKey123", variables, true);//, "businessKey123", variables, withVariablesInReturn: true);
+	var result = await processDefinitionService.StartProcessInstanceByKeyAsync("ReviewInvoice", startProcessRequest);
 
 	Console.WriteLine($"Process started successfully with ID: {result.Id}");
 	Console.WriteLine($"Definition ID: {result.DefinitionId}");

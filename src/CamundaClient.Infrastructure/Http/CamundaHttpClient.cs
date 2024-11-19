@@ -1,10 +1,9 @@
-﻿using CamundaClient.Application.Dtos.Requests;
-using CamundaClient.Application.Dtos.Responses;
-using CamundaClient.Application.Interfaces;
+﻿using CamundaClient.Application.Dtos.Exceptions;
+using CamundaClient.Application.Interfaces.Http;
 using CamundaClient.Infrastructure.Exceptions;
 using CamundaClient.Infrastructure.Interfaces;
 using Microsoft.Extensions.Logging;
-using System.Net;
+using Newtonsoft.Json;
 using System.Text;
 
 namespace CamundaClient.Infrastructure.Http;
@@ -15,105 +14,118 @@ public class CamundaHttpClient : ICamundaHttpClient
 	private readonly ILogger<CamundaHttpClient> _logger;
 	private readonly IJsonSerializer _jsonSerializer;
 
-	public CamundaHttpClient(HttpClient httpClient, ILogger<CamundaHttpClient> logger, IJsonSerializer jsonSerializer)
+	public CamundaHttpClient(
+		HttpClient httpClient,
+		ILogger<CamundaHttpClient> logger,
+		IJsonSerializer jsonSerializer)
 	{
 		_httpClient = httpClient;
 		_logger = logger;
 		_jsonSerializer = jsonSerializer;
 	}
 
-	public async Task<ProcessInstanceWithVariables> StartInstanceAsync(string processDefinitionKey, string? businessKey = null,
-		Dictionary<string, object>? variables = null, bool? withVariablesInReturn = null)
+	public async Task<T> GetAsync<T>(string endpoint)
 	{
-		_logger.LogInformation("Starting process instance with {@ProcessDefinitionKey} and {@BusinessKey}",
-			processDefinitionKey, businessKey);
+		_logger.LogInformation("Preparing GET request to {Endpoint}", endpoint);
+		var response = await SendAsync(HttpMethod.Get, endpoint);
+		return await EnsureNonNullResponse<T>(response, endpoint);
+	}
 
-		// check if variables is null
-		if (variables == null)
-		{
-			variables = [];
-		}
-
-		var camundaVariables = variables.ToDictionary(
-			kv => kv.Key,
-			kv => CamundaVariable.Create(value: kv.Value, type: GetVariableType(kv.Value))
-		);
-
-		var request = StartProcessInstance.Create(
-			businessKey: businessKey,
-			variables: camundaVariables,
-			caseInstanceId: null,
-			instructions: null,
-			skipCustomListeners: false,
-			skipIoMappings: false,
-			withVariablesInReturn: withVariablesInReturn
-		);
-
-		if (request == null)
-		{
-			throw new InvalidOperationException("Request cannot be null.");
-		}
-
-		var jsonContent = _jsonSerializer.Serialize(request);
-
-		if (string.IsNullOrEmpty(jsonContent))
-		{
-			throw new InvalidOperationException("Serialized content cannot be null or empty.");
-		}
-
+	public async Task<T> PostAsync<T>(string endpoint, object content)
+	{
+		var jsonContent = _jsonSerializer.Serialize(content);
+		_logger.LogInformation("Preparing POST request to {Endpoint} with content: {Content}", endpoint, jsonContent);
 		var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+		var response = await SendAsync(HttpMethod.Post, endpoint, httpContent);
+		return await EnsureNonNullResponse<T>(response, endpoint);
+	}
 
-		_logger.LogDebug("Sending HTTP POST to /process-definition/key/{@DefinitionKey}/start", processDefinitionKey);
+	public async Task DeleteAsync(string endpoint)
+	{
+		_logger.LogInformation("Preparing DELETE request to {Endpoint}", endpoint);
+		var response = await SendAsync(HttpMethod.Delete, endpoint);
+		await HandleResponse<object>(response, endpoint);
+	}
 
-		// Αποστολή του αιτήματος στο Camunda API
-		var response = await _httpClient.PostAsync($"process-definition/key/{processDefinitionKey}/start", httpContent);
+	private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string endpoint, HttpContent? content = null)
+	{
+		_logger.LogDebug("Sending {Method} request to {Endpoint} with Content: {Content}",
+			method, endpoint, content == null ? "No Content" : await content.ReadAsStringAsync());
 
+		var request = new HttpRequestMessage(method, endpoint) { Content = content };
+		var response = await _httpClient.SendAsync(request);
+
+		_logger.LogDebug("Received response with StatusCode {StatusCode} for {Endpoint}",
+			response.StatusCode, endpoint);
 
 		if (!response.IsSuccessStatusCode)
 		{
-			var errorContent = await response.Content.ReadAsStringAsync();
-			_logger.LogError("Failed to start process instance. StatusCode: {@StatusCode}, Response: {@Response}",
-			   response.StatusCode, errorContent);
-
-			CamundaError? errorDetails = null;
-
-			// Check if the status code is 400 or 500 before attempting to deserialize error details
-			if (response.StatusCode == HttpStatusCode.BadRequest || response.StatusCode == HttpStatusCode.InternalServerError)
-			{
-				try
-				{
-					errorDetails = _jsonSerializer.Deserialize<CamundaError>(errorContent);
-				}
-				catch
-				{
-				}
-			}
-
-			throw new CamundaApiException($"Camunda API returned an error. Status code: {response.StatusCode}",
-									   (int)response.StatusCode,
-									   errorDetails);
+			_logger.LogWarning("Request to {Endpoint} failed with StatusCode {StatusCode}", endpoint, response.StatusCode);
 		}
 
-		var responseData = await response.Content.ReadAsStringAsync();
-
-		_logger.LogInformation("Process instance started successfully. Response: {@Response}", responseData);
-
-		var processInstance = _jsonSerializer.Deserialize<ProcessInstanceWithVariables>(responseData);
-
-		return processInstance;
+		return response;
 	}
 
-	private string GetVariableType(object value)
+	private async Task<T?> HandleResponse<T>(HttpResponseMessage response, string endpoint)
 	{
-		return value switch
+		if (response.IsSuccessStatusCode)
 		{
-			int => "Integer",
-			bool => "Boolean",
-			string => "String",
-			double => "Double",
-			long => "Long",
-			_ => "Object"
-		};
+			var responseContent = await response.Content.ReadAsStringAsync();
+			_logger.LogDebug("Successful response from {Endpoint} with Content: {ResponseContent}",
+				endpoint, responseContent);
+
+			return _jsonSerializer.Deserialize<T>(responseContent);
+		}
+
+		_logger.LogError("Unsuccessful response from {Endpoint}. Handling error...", endpoint);
+		await HandleErrorResponse(response, endpoint);
+		return default;
 	}
+
+	private async Task<T> EnsureNonNullResponse<T>(HttpResponseMessage response, string endpoint)
+	{
+		var result = await HandleResponse<T>(response, endpoint);
+
+		if (result == null)
+		{
+			throw new InvalidOperationException(
+				$"The API response was null for endpoint '{endpoint}'. Expected a valid object of type {typeof(T).Name}."
+			);
+		}
+
+		return result;
+	}
+
+	private async Task HandleErrorResponse(HttpResponseMessage response, string endpoint)
+	{
+		var content = await response.Content.ReadAsStringAsync();
+		_logger.LogError("Error response content from {Endpoint}: {Content}", endpoint, content);
+
+		var baseException = _jsonSerializer.Deserialize<CamundaException>(content);
+
+		if (baseException != null)
+		{
+			CamundaException? specializedException = DecodeCamundaException(content, baseException.Type);
+
+			_logger.LogError("Handled error for {Endpoint} with StatusCode {StatusCode}: {ErrorDetails}",
+				endpoint, response.StatusCode, specializedException);
+
+			throw new CamundaApiException(
+				$"Error for {endpoint}",
+				(int)response.StatusCode,
+				specializedException
+			);
+		}
+
+		_logger.LogError("Unhandled error for {Endpoint} with StatusCode {StatusCode}", endpoint, response.StatusCode);
+		response.EnsureSuccessStatusCode();
+	}
+
+	private static CamundaException? DecodeCamundaException(string content, string? type) => type switch
+	{
+		"AuthorizationExceptionDto" => JsonConvert.DeserializeObject<AuthorizationException>(content),
+		"ParseExceptionDto" => JsonConvert.DeserializeObject<ParseException>(content),
+		_ => JsonConvert.DeserializeObject<CamundaException>(content)
+	};
 }
 

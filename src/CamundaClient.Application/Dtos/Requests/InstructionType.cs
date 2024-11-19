@@ -2,9 +2,9 @@
 
 public enum InstructionType
 {
-	Cancel,
-	StartBeforeActivity,
-	StartAfterActivity,
-	StartTransition
+    Cancel,
+    StartBeforeActivity,
+    StartAfterActivity,
+    StartTransition
 }
 

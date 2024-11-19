@@ -19,24 +19,24 @@ public record CamundaException
 
 public record AuthorizationException : CamundaException
 {
-	public string? UserId { get; init; }
-	public IEnumerable<MissingAuthorization>? MissingAuthorizations { get; init; }
+    public string? UserId { get; init; }
+    public IEnumerable<MissingAuthorization>? MissingAuthorizations { get; init; }
 }
 public record MissingAuthorization
 {
-	public string? ResourceType { get; init; }
-	public string? ResourceId { get; init; }
-	public string? PermissionName { get; init; }
+    public string? ResourceType { get; init; }
+    public string? ResourceId { get; init; }
+    public string? PermissionName { get; init; }
 }
 
 public record ParseException : CamundaException
 {
-	public IDictionary<string, ResourceReport>? Details { get; init; }
+    public IDictionary<string, ResourceReport>? Details { get; init; }
 }
 
 public record ResourceReport
 {
-	public string? ResourceName { get; init; }
-	public string? ErrorMessage { get; init; }
-	public string? WarningMessage { get; init; }
+    public string? ResourceName { get; init; }
+    public string? ErrorMessage { get; init; }
+    public string? WarningMessage { get; init; }
 }

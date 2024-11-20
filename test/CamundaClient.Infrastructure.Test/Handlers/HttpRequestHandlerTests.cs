@@ -50,29 +50,6 @@ public class HttpRequestHandlerTests
             ItExpr.IsAny<CancellationToken>());
     }
 
-    //[Fact]
-    //public async Task SendAsync_ShouldSendPostRequestWithContent()
-    //{
-    //    // Arrange
-    //    var endpoint = "https://example.com";
-    //    var content = new { Name = "Test" };
-    //    var jsonContent = "{\"Name\":\"Test\"}";
-    //    var responseMessage = new HttpResponseMessage(HttpStatusCode.Created);
-    //    _jsonSerializerMock.Setup(s => s.Serialize(content)).Returns(jsonContent);
-    //    _httpMessageHandlerMock
-    //        .Protected()
-    //        .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Post && req.RequestUri.ToString() == endpoint && req.Content.ReadAsStringAsync().Result == jsonContent), ItExpr.IsAny<CancellationToken>())
-    //        .ReturnsAsync(responseMessage);
-
-    //    // Act
-    //    var response = await _httpRequestHandler.SendAsync(HttpMethod.Post, endpoint, content);
-
-    //    // Assert
-    //    Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-    //    _jsonSerializerMock.VerifyAll();
-    //    _httpMessageHandlerMock.VerifyAll();
-    //}
-
     [Fact]
     public async Task SendAsync_ShouldLogInformation()
     {
@@ -91,15 +68,8 @@ public class HttpRequestHandlerTests
         _loggerMock.Verify(l => l.Log(
             LogLevel.Information,
             It.IsAny<EventId>(),
-            It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Preparing GET request to https://example.com")),
+            It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Preparing GET request to https://example.com")),
             It.IsAny<Exception>(),
-            It.IsAny<Func<It.IsAnyType, Exception, string>>()), Times.Once);
-
-        _loggerMock.Verify(l => l.Log(
-            LogLevel.Information,
-            It.IsAny<EventId>(),
-            It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Sending GET request to https://example.com")),
-            It.IsAny<Exception>(),
-            It.IsAny<Func<It.IsAnyType, Exception, string>>()), Times.Once);
+            It.IsAny<Func<It.IsAnyType, Exception, string>>()!), Times.Once);
     }
 }

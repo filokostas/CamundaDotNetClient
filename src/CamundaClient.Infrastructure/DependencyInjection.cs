@@ -5,9 +5,9 @@ using CamundaClient.Infrastructure.Http;
 using CamundaClient.Infrastructure.Interfaces;
 using CamundaClient.Infrastructure.Utilities;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Http.Resilience;
 using System.Net.Http.Headers;
 
 namespace CamundaClient.Infrastructure;
@@ -27,7 +27,7 @@ public static class DependencyInjection
 
 		services.AddTransient<IJsonSerializer, NewtonsoftJsonSerializer>();
 
-		services.AddHttpClient<IHttpRequestHandler, HttpRequestHandler>((provider, client) =>
+		services.AddHttpClient<ICamundaHttpClient, CamundaHttpClient>((provider, client) =>
 		{
 			var options = provider.GetRequiredService<IOptions<CamundaClientOptions>>().Value;
 
@@ -43,8 +43,8 @@ public static class DependencyInjection
 		})
 		.AddStandardResilienceHandler();
 
+		services.AddTransient<IHttpRequestHandler, HttpRequestHandler>();
 		services.AddTransient<IHttpResponseHandler, HttpResponseHandler>();
-		services.AddTransient<ICamundaHttpClient, CamundaHttpClient>();
 
 		// Services
 

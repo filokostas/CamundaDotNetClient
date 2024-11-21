@@ -1,4 +1,5 @@
-﻿using CamundaClient.Application.Interfaces.Http;
+﻿using CamundaClient.Application;
+using CamundaClient.Application.Interfaces.Http;
 using CamundaClient.Infrastructure.Configuration;
 using CamundaClient.Infrastructure.Handlers;
 using CamundaClient.Infrastructure.Http;
@@ -13,43 +14,45 @@ using System.Net.Http.Headers;
 namespace CamundaClient.Infrastructure;
 public static class DependencyInjection
 {
-	/// <summary>
-	/// Adds the Camunda HTTP client to the service collection with the specified configuration options.
-	/// </summary>
-	/// <param name="services">The service collection to add the HTTP client to.</param>
-	/// <param name="configureOptions">A delegate to configure the <see cref="CamundaClientOptions"/>.</param>
-	/// <returns>The updated service collection.</returns>
-	public static IServiceCollection AddCamundaHttpClient(
-		this IServiceCollection services,
-		Action<CamundaClientOptions> configureOptions)
-	{
-		services.Configure(configureOptions);
+    /// <summary>
+    /// Adds the Camunda HTTP client to the service collection with the specified configuration options.
+    /// </summary>
+    /// <param name="services">The service collection to add the HTTP client to.</param>
+    /// <param name="configureOptions">A delegate to configure the <see cref="CamundaClientOptions"/>.</param>
+    /// <returns>The updated service collection.</returns>
+    public static IServiceCollection AddCamundaHttpClient(
+        this IServiceCollection services,
+        Action<CamundaClientOptions> configureOptions)
+    {
+        services.Configure(configureOptions);
 
-		services.AddTransient<IJsonSerializer, NewtonsoftJsonSerializer>();
+        services.AddTransient<IJsonSerializer, NewtonsoftJsonSerializer>();
 
-		services.AddHttpClient<ICamundaHttpClient, CamundaHttpClient>((provider, client) =>
-		{
-			var options = provider.GetRequiredService<IOptions<CamundaClientOptions>>().Value;
+        services.AddTransient<IHttpRequestHandler, HttpRequestHandler>();
+        services.AddTransient<IHttpResponseHandler, HttpResponseHandler>();
 
-			client.BaseAddress = new Uri(options.BaseUrl);
+        services.AddHttpClient<ICamundaHttpClient, CamundaHttpClient>()
+            .ConfigureHttpClient((provider, client) =>
+            {
+                var options = provider.GetRequiredService<IOptions<CamundaClientOptions>>().Value;
 
-			// Add authentication token if provided
-			if (!string.IsNullOrEmpty(options.AuthenticationToken))
-			{
-				client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", options.AuthenticationToken);
-			}
+                client.BaseAddress = new Uri(options.BaseUrl);
 
-			client.DefaultRequestHeaders.Add("Accept", "application/json");
-		})
-		.AddStandardResilienceHandler();
+                // Add authentication token if provided
+                if (!string.IsNullOrEmpty(options.AuthenticationToken))
+                {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", options.AuthenticationToken);
+                }
 
-		services.AddTransient<IHttpRequestHandler, HttpRequestHandler>();
-		services.AddTransient<IHttpResponseHandler, HttpResponseHandler>();
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            })
+            .AddStandardResilienceHandler();
 
-		// Services
 
-		return services;
-	}
+        services.AddCamundaClientApplication();
+
+        return services;
+    }
 
 }
 

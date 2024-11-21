@@ -1,6 +1,5 @@
 ﻿using CamundaClient.Application.Dtos.Requests;
 using CamundaClient.Application.Interfaces.Services;
-using CamundaClient.Application.Services;
 using CamundaClient.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -23,8 +22,6 @@ services.AddCamundaHttpClient(options =>
     // Uncomment and add token if authentication is required
     // options.AuthenticationToken = "your-auth-token";
 });
-
-services.AddScoped<IProcessDefinitionService, ProcessDefinitionService>();
 
 var serviceProvider = services.BuildServiceProvider();
 

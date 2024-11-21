@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\CamundaClient.Application\CamundaClient.Application.csproj" />
+    <ProjectReference Include="..\..\src\CamundaClient.Infrastructure\CamundaClient.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

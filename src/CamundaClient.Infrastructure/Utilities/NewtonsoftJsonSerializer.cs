@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json.Serialization;
-using Newtonsoft.Json;
+﻿using CamundaClient.Infrastructure.Exceptions;
 using CamundaClient.Infrastructure.Interfaces;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace CamundaClient.Infrastructure.Utilities;
 public class NewtonsoftJsonSerializer : IJsonSerializer
@@ -19,6 +20,13 @@ public class NewtonsoftJsonSerializer : IJsonSerializer
 
 	public T Deserialize<T>(string json)
 	{
-		return JsonConvert.DeserializeObject<T>(json, DefaultSettings);
+		try
+		{
+			return JsonConvert.DeserializeObject<T>(json, DefaultSettings)!;
+		}
+		catch (JsonException ex)
+		{
+			throw new DeserializationException($"Failed to deserialize JSON: {json}", ex);
+		}
 	}
 }

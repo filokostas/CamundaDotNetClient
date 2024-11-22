@@ -8,9 +8,10 @@
    {
        public static IServiceCollection AddCamundaClientApplication(this IServiceCollection services)
        {
-           services.AddScoped<IProcessDefinitionService, ProcessDefinitionService>();
+            services.AddScoped<IProcessDefinitionService, ProcessDefinitionService>();
+            services.AddScoped<ITaskService, TaskService>();
 
-           return services;
+		return services;
        }
    }
 

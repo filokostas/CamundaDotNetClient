@@ -18,10 +18,10 @@ public class ProcessDefinitionService : IProcessDefinitionService
         string processDefinitionKey,
         StartProcessInstance request)
     {
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request), "The request object cannot be null.");
-        }
+        //if (request == null)
+        //{
+        //    throw new ArgumentNullException(nameof(request), "The request object cannot be null.");
+        //}
 
         return await _httpClient.PostAsync<ProcessInstanceWithVariables>(
             $"process-definition/key/{processDefinitionKey}/start",

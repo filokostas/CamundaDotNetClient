@@ -3,7 +3,7 @@
 namespace CamundaClient.Application.Dtos.Requests;
 
 /// <summary>
-/// A Task query which defines a group of Tasks.
+/// A CamundaTask query which defines a group of Tasks.
 /// </summary>
 public record TaskQuery
 {
@@ -1072,21 +1072,5 @@ public record TaskQuery
             var properties = string.Join(", ", forbiddenProperties);
             throw new ArgumentException($"The following properties are not allowed in OrQueries: {properties}");
         }
-    }
-
-    /// <summary>
-    /// Possible delegation states for a task.
-    /// </summary>
-    public enum DelegationStateType
-    {
-        /// <summary>
-        /// Task is pending delegation.
-        /// </summary>
-        PENDING,
-
-        /// <summary>
-        /// Task delegation is resolved.
-        /// </summary>
-        RESOLVED
     }
 }

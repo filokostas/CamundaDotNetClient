@@ -10,6 +10,7 @@ using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using System.Net.Http.Headers;
 
@@ -30,6 +31,7 @@ public static class DependencyInjection
 
         // Register CamundaDateTimeConverter
         services.AddSingleton<JsonConverter, CamundaDateTimeConverter>();
+        services.AddSingleton<JsonConverter, StringEnumConverter>();
 
         // Register JsonSerializerSettings
         services.AddSingleton<JsonSerializerSettings>(sp =>
@@ -40,8 +42,9 @@ public static class DependencyInjection
                 NullValueHandling = NullValueHandling.Ignore,
                 Formatting = Formatting.Indented,
                 DateTimeZoneHandling = DateTimeZoneHandling.Local,
-                DateFormatHandling = DateFormatHandling.IsoDateFormat
-            };
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+				DateParseHandling = DateParseHandling.None, // Prevent automatic date parsing
+			};
 
             // Get all registered JsonConverters
             var converters = sp.GetServices<JsonConverter>();
@@ -79,7 +82,7 @@ public static class DependencyInjection
                 }
 
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
-            })
+			})
             .AddStandardResilienceHandler();
 
 

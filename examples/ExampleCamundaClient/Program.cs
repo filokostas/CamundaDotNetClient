@@ -1,4 +1,4 @@
-﻿using CamundaClient.Application.Dtos.Requests;
+using CamundaClient.Application.Dtos.Requests;
 using CamundaClient.Application.Dtos.Responses;
 using CamundaClient.Application.Interfaces.Services;
 using CamundaClient.Infrastructure;

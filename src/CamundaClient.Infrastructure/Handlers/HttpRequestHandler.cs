@@ -1,5 +1,6 @@
 using CamundaClient.Infrastructure.Interfaces;
 using Microsoft.Extensions.Logging;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace CamundaClient.Infrastructure.Handlers;
@@ -25,10 +26,18 @@ public class HttpRequestHandler : IHttpRequestHandler
 			_logger.LogDebug("Serializing content to JSON: {Json}", json);
 			request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 		}
+		else
+		{
+			// Create an empty content with the Content-Type header set to application/json
+			request.Content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+		}
 
-		//// Set default headers
-		//request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-		//request.Headers.UserAgent.ParseAdd("HttpRequestHandler");
+
+		//request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+		// Set default headers
+		request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+		request.Headers.UserAgent.ParseAdd("HttpRequestHandler");
 
 		return request;
 	}

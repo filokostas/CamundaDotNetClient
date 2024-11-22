@@ -9,6 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using System.Net.Http.Headers;
 
 namespace CamundaClient.Infrastructure;
@@ -26,7 +29,55 @@ public static class DependencyInjection
     {
         services.Configure(configureOptions);
 
-        services.AddTransient<IJsonSerializer, NewtonsoftJsonSerializer>();
+        // Register CamundaDateTimeConverter
+        services.AddSingleton<JsonConverter, CamundaDateTimeConverter>();
+        services.AddSingleton<JsonConverter, StringEnumConverter>();
+
+		// Register JsonSerializerSettingsConfig
+		services.AddSingleton<JsonSerializerSettingsConfig>(sp =>
+		{
+			var converters = sp.GetServices<JsonConverter>();
+			return new JsonSerializerSettingsConfig(converters);
+		});
+
+		// Register IJsonSerializer with injected JsonSerializerSettings
+		services.AddTransient<IJsonSerializer>(sp =>
+		{
+			var settingsConfig = sp.GetRequiredService<JsonSerializerSettingsConfig>();
+			return new NewtonsoftJsonSerializer(settingsConfig.Settings);
+		});
+
+		//     // Register JsonSerializerSettings
+		//     services.AddSingleton<JsonSerializerSettings>(sp =>
+		//     {
+		//         var settings = new JsonSerializerSettings
+		//         {
+		//             ContractResolver = new CamelCasePropertyNamesContractResolver(),
+		//             NullValueHandling = NullValueHandling.Ignore,
+		//             Formatting = Formatting.Indented,
+		//             DateTimeZoneHandling = DateTimeZoneHandling.Local,
+		//             DateFormatHandling = DateFormatHandling.IsoDateFormat,
+		//	DateParseHandling = DateParseHandling.None, // Prevent automatic date parsing
+		//};
+
+		//         // Get all registered JsonConverters
+		//         var converters = sp.GetServices<JsonConverter>();
+
+		//         // Add converters to the settings
+		//         foreach (var converter in converters)
+		//         {
+		//             settings.Converters.Add(converter);
+		//         }
+
+		//         return settings;
+		//     });
+
+		//// Register IJsonSerializer with injected JsonSerializerSettings
+		//services.AddTransient<IJsonSerializer>(sp =>
+  //      {
+  //          var settings = sp.GetRequiredService<JsonSerializerSettings>();
+  //          return new NewtonsoftJsonSerializer(settings);
+  //      });
 
         services.AddTransient<IHttpRequestHandler, HttpRequestHandler>();
         services.AddTransient<IHttpResponseHandler, HttpResponseHandler>();
@@ -45,7 +96,7 @@ public static class DependencyInjection
                 }
 
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
-            })
+			})
             .AddStandardResilienceHandler();
 
 

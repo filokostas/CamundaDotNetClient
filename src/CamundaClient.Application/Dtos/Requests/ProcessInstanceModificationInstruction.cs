@@ -26,5 +26,10 @@ public record ProcessInstanceModificationInstruction
         AncestorActivityInstanceId = ancestorActivityInstanceId;
         CancelCurrentActiveActivityInstances = cancelCurrentActiveActivityInstances;
     }
+
+    public static ProcessInstanceModificationInstruction Create(InstructionType type, Dictionary<string, CamundaVariable>? variables = null, string? activityId = null, string? transitionId = null, string? activityInstanceId = null, string? transitionInstanceId = null, string? ancestorActivityInstanceId = null, bool? cancelCurrentActiveActivityInstances = null)
+    {
+        return new ProcessInstanceModificationInstruction(type, variables, activityId, transitionId, activityInstanceId, transitionInstanceId, ancestorActivityInstanceId, cancelCurrentActiveActivityInstances);
+    }
 }
 

@@ -6,23 +6,23 @@ using Newtonsoft.Json.Serialization;
 namespace CamundaClient.Infrastructure.Utilities;
 public class NewtonsoftJsonSerializer : IJsonSerializer
 {
-	private static readonly JsonSerializerSettings DefaultSettings = new JsonSerializerSettings
-	{
-		ContractResolver = new CamelCasePropertyNamesContractResolver(),
-		NullValueHandling = NullValueHandling.Ignore,
-		Formatting = Formatting.Indented
-	};
+    private readonly JsonSerializerSettings _settings;
 
-	public string Serialize<T>(T obj)
+    public NewtonsoftJsonSerializer(JsonSerializerSettings settings)
+    {
+        _settings = settings;
+    }
+
+    public string Serialize<T>(T obj)
 	{
-		return JsonConvert.SerializeObject(obj, DefaultSettings);
+		return JsonConvert.SerializeObject(obj, _settings);
 	}
 
 	public T Deserialize<T>(string json)
 	{
 		try
 		{
-			return JsonConvert.DeserializeObject<T>(json, DefaultSettings)!;
+			return JsonConvert.DeserializeObject<T>(json, _settings)!;
 		}
 		catch (JsonException ex)
 		{

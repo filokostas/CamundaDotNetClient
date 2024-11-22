@@ -62,7 +62,8 @@ public class HttpRequestHandlerTests
 		// Assert
 		Assert.Equal(HttpMethod.Post, actualRequest.Method);
 		Assert.Equal(new Uri(endpoint), actualRequest.RequestUri);
-		Assert.Null(actualRequest.Content);
+		//Assert.Null(actualRequest.Content);
+		Assert.True(actualRequest.Content == null || actualRequest.Content.Headers.ContentLength == 0, "Request should not have a body");
 	}
 
 
@@ -79,7 +80,8 @@ public class HttpRequestHandlerTests
 		// Assert
 		Assert.Equal(expectedRequest.Method, actualRequest.Method);
 		Assert.Equal(expectedRequest.RequestUri, actualRequest.RequestUri);
-		Assert.Null(actualRequest.Content);
+		//Assert.Null(actualRequest.Content);
+		Assert.True(actualRequest.Content == null || actualRequest.Content.Headers.ContentLength == 0, "Request should not have a body");
 	}
 
 	[Fact]

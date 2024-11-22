@@ -1,4 +1,5 @@
 ﻿using CamundaClient.Application.Dtos.Requests;
+using CamundaClient.Application.Dtos.Responses;
 using CamundaClient.Application.Interfaces.Services;
 using CamundaClient.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +28,7 @@ var serviceProvider = services.BuildServiceProvider();
 
 // Resolve the ProcessDefinitionService
 var processDefinitionService = serviceProvider.GetRequiredService<IProcessDefinitionService>();
+var taskService = serviceProvider.GetRequiredService<ITaskService>();
 
 
 // Prepare request data
@@ -38,22 +40,24 @@ var variables = new Dictionary<string, CamundaVariable>
 
 // Create the StartProcessInstance request
 var startProcessRequest = StartProcessInstance.Create(
-    businessKey: "businessKey123",
+    businessKey: "businessKey124",
     variables: variables,
     withVariablesInReturn: true
 );
 
+ProcessInstanceWithVariables processInstanceWithVariables = null;
+
 try
 {
     // Call StartInstanceAsync
-    var result = await processDefinitionService.StartProcessInstanceByKeyAsync("ReviewInvoice", startProcessRequest);
+    processInstanceWithVariables = await processDefinitionService.StartProcessInstanceByKeyAsync("ReviewInvoice", startProcessRequest);
 
-    Console.WriteLine($"Process started successfully with ID: {result.Id}");
-    Console.WriteLine($"Definition ID: {result.DefinitionId}");
+    Console.WriteLine($"Process started successfully with ID: {processInstanceWithVariables.Id}");
+    Console.WriteLine($"Definition ID: {processInstanceWithVariables.DefinitionId}");
 
-    if (result.Variables != null)
+    if (processInstanceWithVariables.Variables != null)
     {
-        foreach (var variable in result.Variables)
+        foreach (var variable in processInstanceWithVariables.Variables)
         {
             Console.WriteLine($"Variable: {variable.Key}, Value: {variable.Value.Value}, Type: {variable.Value.Type}");
         }
@@ -62,4 +66,26 @@ try
 catch (Exception ex)
 {
     Console.WriteLine($"Error: {ex.Message}");
+}
+
+int FirstResult = 0;
+int MaxResults = 10;
+var queryParameter = TaskQueryParameter.Create(FirstResult, MaxResults);
+
+var taskQuery = TaskQuery.Create(processInstanceId: processInstanceWithVariables!.Id);
+
+try
+{
+    var result = await taskService.QueryTasks(queryParameter, taskQuery);
+
+    Console.WriteLine(result.Count);
+
+	foreach (var camundaTask in result)
+    {
+        Console.WriteLine($"Task ID: {camundaTask.Id}");
+	}
+}
+catch (Exception ex)
+{
+	Console.WriteLine($"Error: {ex.Message}");
 }

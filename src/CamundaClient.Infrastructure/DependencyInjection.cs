@@ -9,6 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System.Net.Http.Headers;
 
 namespace CamundaClient.Infrastructure;
@@ -26,7 +28,39 @@ public static class DependencyInjection
     {
         services.Configure(configureOptions);
 
-        services.AddTransient<IJsonSerializer, NewtonsoftJsonSerializer>();
+        // Register CamundaDateTimeConverter
+        services.AddSingleton<JsonConverter, CamundaDateTimeConverter>();
+
+        // Register JsonSerializerSettings
+        services.AddSingleton<JsonSerializerSettings>(sp =>
+        {
+            var settings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented,
+                DateTimeZoneHandling = DateTimeZoneHandling.Local,
+                DateFormatHandling = DateFormatHandling.IsoDateFormat
+            };
+
+            // Get all registered JsonConverters
+            var converters = sp.GetServices<JsonConverter>();
+
+            // Add converters to the settings
+            foreach (var converter in converters)
+            {
+                settings.Converters.Add(converter);
+            }
+
+            return settings;
+        });
+
+        // Register IJsonSerializer with injected JsonSerializerSettings
+        services.AddTransient<IJsonSerializer>(sp =>
+        {
+            var settings = sp.GetRequiredService<JsonSerializerSettings>();
+            return new NewtonsoftJsonSerializer(settings);
+        });
 
         services.AddTransient<IHttpRequestHandler, HttpRequestHandler>();
         services.AddTransient<IHttpResponseHandler, HttpResponseHandler>();

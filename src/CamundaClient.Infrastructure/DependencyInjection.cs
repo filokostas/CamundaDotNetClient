@@ -33,37 +33,51 @@ public static class DependencyInjection
         services.AddSingleton<JsonConverter, CamundaDateTimeConverter>();
         services.AddSingleton<JsonConverter, StringEnumConverter>();
 
-        // Register JsonSerializerSettings
-        services.AddSingleton<JsonSerializerSettings>(sp =>
-        {
-            var settings = new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                NullValueHandling = NullValueHandling.Ignore,
-                Formatting = Formatting.Indented,
-                DateTimeZoneHandling = DateTimeZoneHandling.Local,
-                DateFormatHandling = DateFormatHandling.IsoDateFormat,
-				DateParseHandling = DateParseHandling.None, // Prevent automatic date parsing
-			};
+		// Register JsonSerializerSettingsConfig
+		services.AddSingleton<JsonSerializerSettingsConfig>(sp =>
+		{
+			var converters = sp.GetServices<JsonConverter>();
+			return new JsonSerializerSettingsConfig(converters);
+		});
 
-            // Get all registered JsonConverters
-            var converters = sp.GetServices<JsonConverter>();
+		// Register IJsonSerializer with injected JsonSerializerSettings
+		services.AddTransient<IJsonSerializer>(sp =>
+		{
+			var settingsConfig = sp.GetRequiredService<JsonSerializerSettingsConfig>();
+			return new NewtonsoftJsonSerializer(settingsConfig.Settings);
+		});
 
-            // Add converters to the settings
-            foreach (var converter in converters)
-            {
-                settings.Converters.Add(converter);
-            }
+		//     // Register JsonSerializerSettings
+		//     services.AddSingleton<JsonSerializerSettings>(sp =>
+		//     {
+		//         var settings = new JsonSerializerSettings
+		//         {
+		//             ContractResolver = new CamelCasePropertyNamesContractResolver(),
+		//             NullValueHandling = NullValueHandling.Ignore,
+		//             Formatting = Formatting.Indented,
+		//             DateTimeZoneHandling = DateTimeZoneHandling.Local,
+		//             DateFormatHandling = DateFormatHandling.IsoDateFormat,
+		//	DateParseHandling = DateParseHandling.None, // Prevent automatic date parsing
+		//};
 
-            return settings;
-        });
+		//         // Get all registered JsonConverters
+		//         var converters = sp.GetServices<JsonConverter>();
 
-        // Register IJsonSerializer with injected JsonSerializerSettings
-        services.AddTransient<IJsonSerializer>(sp =>
-        {
-            var settings = sp.GetRequiredService<JsonSerializerSettings>();
-            return new NewtonsoftJsonSerializer(settings);
-        });
+		//         // Add converters to the settings
+		//         foreach (var converter in converters)
+		//         {
+		//             settings.Converters.Add(converter);
+		//         }
+
+		//         return settings;
+		//     });
+
+		//// Register IJsonSerializer with injected JsonSerializerSettings
+		//services.AddTransient<IJsonSerializer>(sp =>
+  //      {
+  //          var settings = sp.GetRequiredService<JsonSerializerSettings>();
+  //          return new NewtonsoftJsonSerializer(settings);
+  //      });
 
         services.AddTransient<IHttpRequestHandler, HttpRequestHandler>();
         services.AddTransient<IHttpResponseHandler, HttpResponseHandler>();

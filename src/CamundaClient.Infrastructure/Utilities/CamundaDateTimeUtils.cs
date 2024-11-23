@@ -1,23 +1,20 @@
 ﻿using System.Globalization;
 using System.Net;
+using System.Text.RegularExpressions;
 
 namespace CamundaClient.Infrastructure.Utilities;
 
-public static class CamundaDateTimeUtils
+public class CamundaDateTimeUtils : ICamundaDateTimeUtils
 {
-    private const string CamundaDateFormat = "yyyy-MM-dd'T'HH:mm:ss.fffK";
-
-    public static string FormatDateTime(DateTime dateTime)
+    public string FormatDateTime(DateTimeOffset dateTime)
     {
-        string formattedDate = dateTime.ToString(CamundaDateFormat, CultureInfo.InvariantCulture);
+		string formattedDate = dateTime.ToString("yyyy-MM-dd'T'HH:mm:ss.fff");
+		string offset = dateTime.Offset.ToString(@"\+hhmm;\-hhmm");
 
-        // Remove the colon from the timezone offset
-        formattedDate = RemoveTimezoneColon(formattedDate);
+		return formattedDate + offset;
+	}
 
-        return formattedDate;
-    }
-
-    public static string UrlEncodeDateTime(DateTime dateTime)
+    public string UrlEncodeDateTime(DateTimeOffset dateTime)
     {
         string formattedDate = FormatDateTime(dateTime);
 
@@ -25,12 +22,18 @@ public static class CamundaDateTimeUtils
         return WebUtility.UrlEncode(formattedDate);
     }
 
-    private static string RemoveTimezoneColon(string dateTime)
-    {
-        if (dateTime.Length > 6 && (dateTime[^6] == '+' || dateTime[^6] == '-'))
-        {
-            return dateTime.Remove(dateTime.Length - 3, 1);
-        }
-        return dateTime;
-    }
+	//private static string RemoveTimezoneColon(string dateTime)
+	//{
+	//    if (dateTime.Length > 6 && (dateTime[^6] == '+' || dateTime[^6] == '-'))
+	//    {
+	//        return dateTime.Remove(dateTime.Length - 3, 1);
+	//    }
+	//    return dateTime;
+	//}
+}
+
+public interface ICamundaDateTimeUtils
+{
+	string FormatDateTime(DateTimeOffset dateTime);
+	string UrlEncodeDateTime(DateTimeOffset dateTime);
 }

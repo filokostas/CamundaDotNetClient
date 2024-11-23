@@ -76,11 +76,15 @@ var taskQuery = TaskQuery.Create(processInstanceId: processInstanceWithVariables
 
 try
 {
-    var result = await taskService.QueryTasks(queryParameter, taskQuery);
+    var countResult = await taskService.QueryTasksCount(taskQuery);
 
-    Console.WriteLine(result.Count);
+	Console.WriteLine($"Total tasks: {countResult.Count}");
 
-	foreach (var camundaTask in result)
+	var camundaTasks = await taskService.QueryTasks(queryParameter, taskQuery);
+
+    Console.WriteLine(camundaTasks.Count);
+
+	foreach (var camundaTask in camundaTasks)
     {
         Console.WriteLine($"Task ID: {camundaTask.Id}");
 	}

@@ -13,7 +13,7 @@ public class CamundaVariableTests
         var local = true;
 
         // Act
-        var camundaVariable = CamundaVariable.CreateTriggerVariable(value, type, valueInfo, local);
+        var camundaVariable = CamundaVariable.Create(value, type, valueInfo, local);
 
         // Assert
         Assert.Equal(value, camundaVariable.Value);
@@ -32,7 +32,7 @@ public class CamundaVariableTests
         var local = true;
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => CamundaVariable.CreateTriggerVariable(value!, type, valueInfo, local));
+        var exception = Assert.Throws<ArgumentNullException>(() => CamundaVariable.Create(value!, type, valueInfo, local));
         Assert.Equal("value", exception.ParamName);
     }
 }

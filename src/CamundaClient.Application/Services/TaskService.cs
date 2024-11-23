@@ -23,4 +23,10 @@ public class TaskService(ICamundaHttpClient httpClient) : ITaskService
 
 		return await httpClient.PostAsync<List<CamundaTask>>(endpoint, taskQuery);
 	}
+
+	public async Task<CountResult> QueryTasksCount(TaskQuery? taskQuery = null)
+	{
+		var endpoint = "task/count";
+		return await httpClient.PostAsync<CountResult>(endpoint, taskQuery);
+	}
 }

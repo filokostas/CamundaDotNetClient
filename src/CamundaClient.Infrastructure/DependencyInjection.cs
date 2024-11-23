@@ -11,7 +11,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
 using System.Net.Http.Headers;
 
 namespace CamundaClient.Infrastructure;
@@ -31,7 +30,8 @@ public static class DependencyInjection
 
         // Register CamundaDateTimeConverter
         services.AddSingleton<JsonConverter, CamundaDateTimeConverter>();
-        services.AddSingleton<JsonConverter, StringEnumConverter>();
+		services.AddSingleton<JsonConverter, CamundaVariableConverter>();
+		services.AddSingleton<JsonConverter, StringEnumConverter>();
 
 		// Register JsonSerializerSettingsConfig
 		services.AddSingleton<JsonSerializerSettingsConfig>(sp =>

@@ -5,20 +5,8 @@ namespace CamundaClient.Application.Dtos.Requests;
 /// <summary>
 /// Represents sorting parameters for task queries.
 /// </summary>
-public record TaskQuerySorting
+public record TaskQuerySorting : QuerySorting<TaskQuerySorting.SortByCriteria>
 {
-    /// <summary>
-    /// Sort the results lexicographically by a given criterion.
-    /// Must be used in conjunction with the sortOrder parameter.
-    /// </summary>
-    public SortByCriteria? SortBy { get; }
-
-    /// <summary>
-    /// Sort the results in a given order. Values may be <c>asc</c> for ascending order or <c>desc</c> for descending order.
-    /// Must be used in conjunction with the sortBy parameter.
-    /// </summary>
-    public SortOrderCriteria? SortOrder { get; }
-
     /// <summary>
     /// Mandatory when <c>sortBy</c> is one of the following values: <c>processVariable</c>, <c>executionVariable</c>,
     /// <c>taskVariable</c>, <c>caseExecutionVariable</c> or <c>caseInstanceVariable</c>. Must be a JSON object with the properties
@@ -26,14 +14,15 @@ public record TaskQuerySorting
     /// </summary>
     public SortTaskQueryParameters? Parameters { get; }
 
-    private TaskQuerySorting(SortByCriteria? sortBy = null, SortOrderCriteria? sortOrder = null, SortTaskQueryParameters? parameters = null)
-    {
-        SortBy = sortBy;
-        SortOrder = sortOrder;
+    private TaskQuerySorting(
+        SortByCriteria sortBy, 
+        SortOrderCriteria sortOrder, 
+        SortTaskQueryParameters? parameters = null) : base(sortBy, sortOrder)
+	{
         Parameters = parameters;
 
         // Validation: If sortBy is one of the specified values, parameters must be provided.
-        if (sortBy.HasValue && IsVariableSortBy(sortBy.Value))
+        if (IsVariableSortBy(sortBy))
         {
             Guard.NotNull(parameters, nameof(parameters), "Parameters are mandatory when sortBy is a variable-based criterion.");
         }
@@ -42,7 +31,10 @@ public record TaskQuerySorting
     /// <summary>
     /// Creates a new instance of the <see cref="TaskQuerySorting"/> record.
     /// </summary>
-    public static TaskQuerySorting Create(SortByCriteria? sortBy = null, SortOrderCriteria? sortOrder = null, SortTaskQueryParameters? parameters = null)
+    public static TaskQuerySorting Create(
+        SortByCriteria sortBy, 
+        SortOrderCriteria sortOrder, 
+        SortTaskQueryParameters? parameters = null)
     {
         return new TaskQuerySorting(sortBy, sortOrder, parameters);
     }
@@ -83,21 +75,5 @@ public record TaskQuerySorting
         taskVariable,
         caseExecutionVariable,
         caseInstanceVariable
-    }
-
-    /// <summary>
-    /// Sort order criteria.
-    /// </summary>
-    public enum SortOrderCriteria
-    {
-        /// <summary>
-        /// Ascending order.
-        /// </summary>
-        asc,
-
-        /// <summary>
-        /// Descending order.
-        /// </summary>
-        desc
     }
 }

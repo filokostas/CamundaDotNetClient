@@ -10,8 +10,9 @@
        {
             services.AddScoped<IProcessDefinitionService, ProcessDefinitionService>();
             services.AddScoped<ITaskService, TaskService>();
+            services.AddScoped<IVariableInstanceService, VariableInstanceService>();
 
-		return services;
+		    return services;
        }
    }
 

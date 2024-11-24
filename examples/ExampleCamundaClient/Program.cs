@@ -29,6 +29,7 @@ var serviceProvider = services.BuildServiceProvider();
 // Resolve the ProcessDefinitionService
 var processDefinitionService = serviceProvider.GetRequiredService<IProcessDefinitionService>();
 var taskService = serviceProvider.GetRequiredService<ITaskService>();
+var variableInstanceService = serviceProvider.GetRequiredService<IVariableInstanceService>();
 
 
 // Prepare request data
@@ -70,9 +71,12 @@ catch (Exception ex)
 
 int FirstResult = 0;
 int MaxResults = 10;
-var queryParameter = TaskQueryParameter.Create(FirstResult, MaxResults);
+var queryParameter = TaskQueryParameters.Create(FirstResult, MaxResults);
 
 var taskQuery = TaskQuery.Create(processInstanceId: processInstanceWithVariables!.Id);
+
+var variableInstanceQueryParameters = VariableInstanceQueryParameters.Create(FirstResult, MaxResults);
+var variableInstanceQuery = VariableInstanceQuery.Create(processInstanceIdIn: new List<string> { processInstanceWithVariables!.Id });
 
 try
 {
@@ -87,6 +91,25 @@ try
 	foreach (var camundaTask in camundaTasks)
     {
         Console.WriteLine($"Task ID: {camundaTask.Id}");
+	}
+}
+catch (Exception ex)
+{
+	Console.WriteLine($"Error: {ex.Message}");
+}
+
+try
+{
+    var variableCountResult = await variableInstanceService.QueryVariableInstancesCount(variableInstanceQuery);
+
+	Console.WriteLine($"Total variables: {variableCountResult.Count}");
+
+	var variableInstances = await variableInstanceService.QueryVariableInstances(variableInstanceQueryParameters, variableInstanceQuery);
+	Console.WriteLine(variableInstances.Count);
+
+	foreach (var variableInstance in variableInstances)
+	{
+		Console.WriteLine($"Variable Name: {variableInstance.Name}, Value: {variableInstance.Value}, Type: {variableInstance.Type}");
 	}
 }
 catch (Exception ex)

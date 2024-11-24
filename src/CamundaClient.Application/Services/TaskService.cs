@@ -6,7 +6,7 @@ using CamundaClient.Application.Interfaces.Services;
 namespace CamundaClient.Application.Services;
 public class TaskService(ICamundaHttpClient httpClient) : ITaskService
 {
-	public async Task<List<CamundaTask>> QueryTasks(TaskQueryParameter? queryParameter = null, TaskQuery? taskQuery = null)
+	public async Task<List<CamundaTask>> QueryTasks(TaskQueryParameters? queryParameter = null, TaskQuery? taskQuery = null)
 	{
 		var queryParams = new List<string>();
 

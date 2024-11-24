@@ -5,6 +5,6 @@ namespace CamundaClient.Application.Interfaces.Services;
 
 public interface ITaskService
 {
-	Task<List<CamundaTask>> QueryTasks(TaskQueryParameter? queryParameter = null, TaskQuery? taskQuery = null);
+	Task<List<CamundaTask>> QueryTasks(TaskQueryParameters? queryParameter = null, TaskQuery? taskQuery = null);
 	Task<CountResult> QueryTasksCount(TaskQuery? taskQuery = null);
 }

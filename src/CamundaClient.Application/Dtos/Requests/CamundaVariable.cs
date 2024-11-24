@@ -35,19 +35,6 @@ public record CamundaVariable
     {
         return new CamundaVariable(value, type, valueInfo, local);
     }
-
-    ///// <summary>
-    ///// Creates a variable with an optional local flag.
-    ///// </summary>
-    ///// <param name="value">The value of the variable. Cannot be null.</param>
-    ///// <param name="type">The type of the variable (optional).</param>
-    ///// <param name="valueInfo">Additional metadata about the variable (optional).</param>
-    ///// <param name="local">Indicates if the variable is local. Nullable.</param>
-    ///// <returns>A new instance of <see cref="CamundaVariable"/>.</returns>
-    ///// <exception cref="ArgumentNullException">Thrown when the value is null.</exception>
-    //public static CamundaVariable CreateTriggerVariable(object value, string? type = null, Dictionary<string, object>? valueInfo = null, bool? local = null)
-    //{
-    //    return new CamundaVariable(value, type, valueInfo, local);
-    //}
 }
+
 

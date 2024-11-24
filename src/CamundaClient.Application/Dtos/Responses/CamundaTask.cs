@@ -1,5 +1,4 @@
 ﻿using CamundaClient.Application.Dtos.Requests;
-using static CamundaClient.Application.Dtos.Requests.TaskQuery;
 
 namespace CamundaClient.Application.Dtos.Responses;
 
